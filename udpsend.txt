@@ -1,0 +1,52 @@
+PD dancer network stuff - 
+
+
+UDPSEND (to send number values, not audio)
+* Dancer - connect power, let it start
+* Computer - login to VNC, and connect to dancer when possible
+* Dancer - in the pd-window with "sonic dancer-03..." i removed connection to "print received", was not necessary..
+In the other pd-window "sampler..." i added the [udpsend] object etc. It takes env-values (volume basically) of the music generated, and sends it to the computer-pd (which has to have a [udpreceive] etc).
+The other, [send~ 2 512] should read [udpsend..etc], but removed to avoid conflicts. This object should be able to send audio data, rather than env/volume data, which would be better for visuals i think, but for now it doesant work..
+* Computer - open pd "gem test 4" or what its called, and check for the [udpreceive 9002] object, and press the message-box above [port 9002[ (this starts listen to 9002-port).
+* Dancer - in the VNC dancer pd-file, press [connect 192.... 9002[ (message box). This should automatically put an X in the toggle-box below if it worked!
+* Computer - check that the number box below udpreceive is getting numbers.
+-> this is now sent to the array with [s musicENV], and then the values we use for modulation is coming from [s music] -> use [r music] and connect to whatever fun stuff you want.
+Then create the Gem-screen etc, as it says in the pd-file..
+			
+Remember to change ip address to yours in the dancer-pd object that sends.
+also be connected to the same network. (prob need separate screen/keyboard etc to fix if first time..
+Also press disconnect-messagebox in the dancer-pd-file on the active connection, before changing connection/type..
+
+
+
+UDPSEND~ (to send audio data)
+The ~ objects can send audio data instead of just numbers etc.
+The audio data can be used in the array/read as we did with the recorded file, which seem to give much nicer values for modulating stuff. We can try to get this to work sending audio instead of the [udpsend] above with only numbers. To experiment whats nicest. But yeah, at least it kind of works with the above solution..
+
+(update) works to send audio now, but with alot of latency/lag, should be possible to reduce somehow, with bits..or stuff..bitrate? No idea. Something w the 512-argument in the object box maybe..
+BUT to change between using volume/number data, and using audio data, see below:
+
+
+
+CHANGING BETWEEN [udpsend] AND [udpsend~]
+I saved it in the udpsend-version, so it sends numbers, not audio.
+to use audio data instead, 
+* first press [disconnect[  on the active connection in dancer-pd (with a X-checked in the box).
+* Press [connect 192.....9001[ message box, for the other connection (the [udpsend~ 2 512] object). ~ symbol means audio signal!
+  Should get the X in the checkbox...
+			
+So port 9002 is now for number-data -> connect [udpsend]
+Port 9001 is for audio data -> connect [udpsend~ 2 512]
+		
+In the computer pd file:
+* Close to the "arraymusic1" section, there is both [r~ musicRNV] and [r musicENV].
+Default is that the one with no ~ is connected to "tabwrite".
+If using the audio instead, disconnect that, and instead connect the [*~ 10] under [r~ musicENV].
+* Right click on the array/graph itself, properties, and on "canvas properties" change Y-range to 0-1 (i think).
+* To the left of the breath-array, there is the main receive for the audio. The box below env~ should have numbers in it if its working, and graph should show it too..
+* Press [port 9001[ message over [udpreceive~......] to start scanning for the incoming signal..
+
+
+
+Netsend/receive
+We also can receive Note, Height, Energy etc, with the [netreceive] below where you create the gem-display (unplugged now, but we can plug it in if we need it). Can also use those values for something, even if its not super smooth..
